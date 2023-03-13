@@ -1,0 +1,1 @@
+export const PlaceholderSittingImage =  require('./placeholder_sitting.png')
