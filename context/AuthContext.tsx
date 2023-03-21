@@ -9,16 +9,24 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  createUserWithEmailAndPassword,
 } from "firebase/auth"
 
 import * as fa from "firebase/auth"
 import { auth } from "../firebaseConfig"
 import { IUSER } from "../types"
+
+type SIGNUP_USER = {
+  email: string
+  password: string
+}
+
 interface AuthContextType {
   isAuthenticated: boolean
   user: IUSER
-  login: () => void
+  login: (u: SIGNUP_USER) => void
   loginAnonymously: () => void
+  signup: (u: SIGNUP_USER) => void
   logout: () => void
 }
 
@@ -27,6 +35,7 @@ export const AuthContext = React.createContext<AuthContextType>({
   user: {},
   login: () => {},
   loginAnonymously: () => {},
+  signup: () => {},
   logout: () => {},
 })
 
@@ -36,7 +45,7 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
 
   const login = () => {
     const provider = new GoogleAuthProvider()
-    console.log(fa, "----signInWithPopup")
+    console.log("----login")
     return
     signInWithPopup(auth, provider)
       .then((result) => {
@@ -77,6 +86,21 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
       })
   }
 
+  const signup = ({ email, password }: SIGNUP_USER) => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user
+        console.log(userCredential, "----signup")
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code
+        const errorMessage = error.message
+        // ..
+      })
+  }
+
   const logout = () => {
     setIsAuthenticated(false)
   }
@@ -86,6 +110,7 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
     user,
     login,
     loginAnonymously,
+    signup,
     logout,
   }
   useEffect(() => {
