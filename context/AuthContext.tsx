@@ -8,8 +8,8 @@ import {
   signInAnonymously,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup,
   createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from "firebase/auth"
 import { doc, collection, setDoc } from "firebase/firestore"
 
@@ -43,31 +43,16 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [user, setUser] = useState<KKUser>({})
 
-  const login = () => {
+  const login: (u: SIGNUP_USER) => void = ({ email, password }) => {
     const provider = new GoogleAuthProvider()
     console.log("----login")
-    return
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result)
-        const token = credential?.accessToken
-        // The signed-in user info.
-        const user = result.user
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
+
+    signInWithEmailAndPassword(auth, email, password).then(
+      async (userCredential) => {
+        // Signed in
         setIsAuthenticated(true)
-      })
-      .catch((error) => {
-        // Handle Errors here.
-        const errorCode = error.code
-        const errorMessage = error.message
-        // The email of the user's account used.
-        const email = error.customData.email
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error)
-        // ...
-      })
+      }
+    )
   }
 
   const loginAnonymously = () => {
@@ -135,7 +120,7 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
-        const uid = user.uid
+
         const _user: KKUser = {
           uid: user.uid,
           displayName: user.displayName,

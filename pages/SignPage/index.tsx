@@ -43,12 +43,16 @@ export default function SignPage() {
         </View>
         <View style={styles.loginContainer}>
           {/* <Button label="Anonymous" onPress={loginAnonymously} /> */}
-          {/* <Button style={{ width: 100 }} label="SignIn" onPress={login} /> */}
           <Button
+            style={{ width: 100 }}
+            label="SignIn"
+            onPress={handleSignIn}
+          />
+          {/* <Button
             style={{ width: 100 }}
             label="SignUp"
             onPress={handleSignup}
-          />
+          /> */}
         </View>
         <Button label="SignOut" onPress={logout} />
       </View>
