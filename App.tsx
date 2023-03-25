@@ -15,7 +15,7 @@ const Stack = createNativeStackNavigator()
 
 function TabRoot() {
   return (
-    <Tab.Navigator initialRouteName="BoringScene">
+    <Tab.Navigator initialRouteName="KnockPage">
       <Tab.Screen name="MyNeighbors" component={KnockPage} />
       <Tab.Screen name="BoringScene" component={BoringScene} />
     </Tab.Navigator>

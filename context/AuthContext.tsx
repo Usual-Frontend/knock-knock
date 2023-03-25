@@ -11,10 +11,10 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword,
 } from "firebase/auth"
+import { doc, collection, setDoc } from "firebase/firestore"
 
-import * as fa from "firebase/auth"
-import { auth } from "../firebaseConfig"
-import { IUSER } from "../types"
+import { auth, db } from "../firebaseConfig"
+import { KKUser } from "../model"
 
 type SIGNUP_USER = {
   email: string
@@ -23,7 +23,7 @@ type SIGNUP_USER = {
 
 interface AuthContextType {
   isAuthenticated: boolean
-  user: IUSER
+  user: KKUser
   login: (u: SIGNUP_USER) => void
   loginAnonymously: () => void
   signup: (u: SIGNUP_USER) => void
@@ -41,7 +41,7 @@ export const AuthContext = React.createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<any> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
-  const [user, setUser] = useState<IUSER>({})
+  const [user, setUser] = useState<KKUser>({})
 
   const login = () => {
     const provider = new GoogleAuthProvider()
@@ -87,17 +87,32 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
   }
 
   const signup = ({ email, password }: SIGNUP_USER) => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+    console.log(email, password, "email, password11 ")
+
+    return createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
         // Signed in
-        const user = userCredential.user
-        console.log(userCredential, "----signup")
-        // ...
+        setIsAuthenticated(true)
+        const newUser = new KKUser({
+          ...userCredential.user,
+          at_leisure: true,
+        })
+
+        try {
+          const usersRef = doc(collection(db, "users"))
+
+          //TODO， 暂时必须用解构的方式，直接传入newUser会报错，除非[自定义Converter](https://firebase.google.com/docs/firestore/manage-data/add-data?hl=zh-cn)
+          await setDoc(usersRef, { ...newUser })
+
+          console.log("Document written with ID: ", usersRef.id)
+        } catch (e) {
+          console.error("Error adding document: ", e)
+        }
+        // setUser(user)
       })
       .catch((error) => {
-        const errorCode = error.code
         const errorMessage = error.message
-        // ..
+        console.log(errorMessage, "---error")
       })
   }
 
@@ -121,14 +136,12 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
         const uid = user.uid
-        const _user: IUSER = {
+        const _user: KKUser = {
           uid: user.uid,
           displayName: user.displayName,
           isAnonymous: user.isAnonymous,
         }
         setUser(_user)
-        // setIsAuthenticated(true)
-        // console.log(user, "---user3333")
         // ...
       } else {
         // User is signed out
