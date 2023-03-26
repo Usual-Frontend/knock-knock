@@ -10,7 +10,7 @@ import {
 import Button from "../components/Button"
 import * as ImagePicker from "expo-image-picker"
 import { useActiveUsers, useSendKnockMessage } from "../hooks"
-import { KKChat, KKUser } from "../model"
+import { KKUser } from "../model"
 
 export default function KnockPage() {
   const activeUsers = useActiveUsers()
@@ -35,8 +35,7 @@ export default function KnockPage() {
   }
 
   const handleKnock = async (item: KKUser) => {
-    const chatId = await sendKnockMessage(item)
-    console.log(chatId, "---chatId")
+    await sendKnockMessage(item)
   }
 
   // useEffect(() => {

@@ -10,14 +10,20 @@ import { useContext, useEffect, useState } from "react"
 
 import { AuthContext, AuthProvider } from "./context/AuthContext"
 import { Pressable, Text, View } from "react-native"
+import { useObserveMessages } from "./hooks"
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
 
 function TabRoot() {
+  const {count} = useObserveMessages()
   return (
     <Tab.Navigator initialRouteName="KnockPage">
       <Tab.Screen name="MyNeighbors" component={KnockPage} />
-      <Tab.Screen name="BoringScene" component={BoringScene} />
+      <Tab.Screen
+        name="BoringScene"
+        component={BoringScene}
+        options={{ tabBarBadge: count }}
+      />
     </Tab.Navigator>
   )
 }
