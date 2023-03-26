@@ -1,12 +1,20 @@
 import { StatusBar } from "expo-status-bar"
-import { StyleSheet, Text, View, FlatList, Dimensions } from "react-native"
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  Dimensions,
+  Pressable,
+} from "react-native"
 import Button from "../components/Button"
 import * as ImagePicker from "expo-image-picker"
-import { useActiveUsers } from "../hooks"
-import { useEffect } from "react"
+import { useActiveUsers, useSendKnockMessage } from "../hooks"
+import { KKChat, KKUser } from "../model"
 
 export default function KnockPage() {
   const activeUsers = useActiveUsers()
+  const sendKnockMessage = useSendKnockMessage()
 
   const { width, height } = Dimensions.get("window")
   const cellSize = width * 0.25 // 25% of screen width
@@ -25,6 +33,12 @@ export default function KnockPage() {
       alert("you didn't select any image.")
     }
   }
+
+  const handleKnock = async (item: KKUser) => {
+    const chatId = await sendKnockMessage(item)
+    console.log(chatId, "---chatId")
+  }
+
   // useEffect(() => {
   //   console.log(activeUsers, "===activeUsers")
   // }, [activeUsers])
@@ -36,10 +50,12 @@ export default function KnockPage() {
         numColumns={3}
         keyExtractor={(item) => item.email}
         renderItem={({ item }) => (
-          <View style={styles.boxContainer}>
-            <Text>🚪</Text>
-            <Text>{item.email}</Text>
-          </View>
+          <Pressable onPress={() => handleKnock(item)}>
+            <View style={styles.boxContainer}>
+              <Text>🚪</Text>
+              <Text>{item.email}</Text>
+            </View>
+          </Pressable>
         )}
       />
 

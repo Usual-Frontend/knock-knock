@@ -7,11 +7,11 @@ import React, {
 import {
   signInAnonymously,
   onAuthStateChanged,
-  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth"
 import { doc, collection, setDoc } from "firebase/firestore"
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { auth, db } from "../firebaseConfig"
 import { KKUser } from "../model"
@@ -44,15 +44,11 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
   const [user, setUser] = useState<KKUser>({})
 
   const login: (u: SIGNUP_USER) => void = ({ email, password }) => {
-    const provider = new GoogleAuthProvider()
     console.log("----login")
-
-    signInWithEmailAndPassword(auth, email, password).then(
-      async (userCredential) => {
-        // Signed in
-        setIsAuthenticated(true)
-      }
-    )
+    signInWithEmailAndPassword(auth, email, password).then(() => {
+      // Signed in
+      setIsAuthenticated(true)
+    })
   }
 
   const loginAnonymously = () => {
@@ -114,9 +110,7 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
     logout,
   }
   useEffect(() => {
-    console.log("isAuthenticated----8888", isAuthenticated)
-
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async(user) => {
       if (user) {
         // User is signed in, see docs for a list of available properties
         // https://firebase.google.com/docs/reference/js/firebase.User
@@ -127,6 +121,8 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
           isAnonymous: user.isAnonymous,
         }
         setUser(_user)
+        await AsyncStorage.setItem('user', JSON.stringify(user)); // 保存用户信息
+        console.log('Login Success', _user);
         // ...
       } else {
         // User is signed out
@@ -134,6 +130,14 @@ export const AuthProvider: React.FC<any> = ({ children }) => {
       }
     })
   }, [auth, isAuthenticated])
+
+  useEffect(() => {
+    AsyncStorage.getItem('user').then((user) => {
+      if (user) {
+        setUser(JSON.parse(user));
+      }
+    });
+  }, []);
 
   return (
     <AuthContext.Provider value={authContextValue}>
